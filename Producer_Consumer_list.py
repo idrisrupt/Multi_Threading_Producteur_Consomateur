@@ -13,8 +13,10 @@ class Producer(Thread):
         self.producers_lock = Lock()
 
     def produce_item(self):
-        self.items.append(1)
-        print("{}: item produit".format(self.name))
+        global items
+        num = random.randint(1, 100)
+        self.items.append(num)
+        print("{}: item produit {}".format(self.name, num))
 
     def wait(self):
         attente = 0.2
@@ -37,8 +39,9 @@ class Consumer(Thread):
         self.consumers_lock = Lock()
 
     def consume_item(self):
-        item = self.items.pop()
-        print("{}: item consomme".format(self.name))
+        global items
+        item = self.items.pop(0)
+        print("{}: item consomme {}".format(self.name, item))
 
     def wait(self):
         attente = 0.2
