@@ -3,14 +3,15 @@ import random
 import time
 from threading import *
 
+
 lock = Lock()
 
 
 class Producer(Thread):
-    def __init__(self, items, lock):
+    def __init__(self, items):
         Thread.__init__(self)
         self.items = items
-        self.producers_lock = Lock()
+        # self.producers_lock = RLock()
 
     def produce_item(self):
         global items
@@ -24,19 +25,22 @@ class Producer(Thread):
         time.sleep(attente)
 
     def run(self):
-        while 1:
-            self.wait()
-            self.producers_lock.acquire()
-            self.produce_item()
-            self.producers_lock.release()
-            self.wait()
+        try:
+            while 1:
+                self.wait()
+
+                # self.producers_lock.acquire()
+                self.produce_item()
+                # self.producers_lock.release()
+                self.wait()
+        finally:
+            lock.release()
 
 
 class Consumer(Thread):
-    def __init__(self, items, lock):
+    def __init__(self, items):
         Thread.__init__(self)
         self.items = items
-        self.consumers_lock = Lock()
 
     def consume_item(self):
         global items
@@ -49,14 +53,20 @@ class Consumer(Thread):
         time.sleep(attente)
 
     def run(self):
-        while 1:
-            self.wait()
-            self.consumers_lock.acquire()
-            self.consume_item()
-            self.consumers_lock.release()
+        lock.acquire()
+        try:
+            while 1:
+                self.wait()
+
+                self.consume_item()
+
+        finally:
+            lock.release()
 
 
 if __name__ == "__main__":
+
+    lock = Lock()
 
     count_producers = 5
     count_consumers = 5
@@ -65,12 +75,13 @@ if __name__ == "__main__":
     consumers = []
 
     for i in range(count_producers):
-        proc = Producer(items, lock)
+        proc = Producer(items)
         producers.append(proc)
         proc.start()
 
     for i in range(count_consumers):
-        proc = Consumer(items, lock)
+        proc = Consumer(items)
+
         consumers.append(proc)
         proc.start()
 
