@@ -3,8 +3,6 @@ import random
 import time
 from threading import *
 
-lock = Lock()
-
 
 class Producer(Thread):
     def __init__(self, items):
@@ -12,7 +10,6 @@ class Producer(Thread):
         self.items = items
 
     def produce_item(self):
-        global items
         num = random.randint(1, 100)
         self.items.append(num)
         print("{}: item produit {}".format(self.name, num))
@@ -23,13 +20,10 @@ class Producer(Thread):
         time.sleep(attente)
 
     def run(self):
-        lock.acquire()
-        try:
-            while 1:
-                self.produce_item()
-                self.wait()
-        finally:
-            lock.release()
+        while 1:
+            self.wait()
+            self.produce_item()
+            self.wait()
 
 
 class Consumer(Thread):
@@ -38,7 +32,6 @@ class Consumer(Thread):
         self.items = items
 
     def consume_item(self):
-        global items
         item = self.items.pop(0)
         print("{}: item consomme {}".format(self.name, item))
 
@@ -48,19 +41,17 @@ class Consumer(Thread):
         time.sleep(attente)
 
     def run(self):
-        lock.acquire()
-        try:
-            while 1:
-                self.wait()
-                self.consume_item()
-        finally:
-            lock.release()
+
+        while 1:
+            self.wait()
+            self.consume_item()
+            self.wait()
 
 
 if __name__ == "__main__":
 
-    count_producers = 5
-    count_consumers = 5
+    count_producers = 2
+    count_consumers = 3
     items = []
     producers = []
     consumers = []
@@ -72,7 +63,6 @@ if __name__ == "__main__":
 
     for i in range(count_consumers):
         proc = Consumer(items)
-
         consumers.append(proc)
         proc.start()
 
