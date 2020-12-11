@@ -5,58 +5,53 @@ from queue import Queue
 
 
 class Producer(Thread):
-    def __init__(self, items):
+    def __init__(self, ):
         Thread.__init__(self)
-        self.items = items
 
     def produce_item(self):
-        global items
         num = random.randint(1,100)
         items.put(num)
-        print("{}:produced an item {}".format(self.name,num))
+        print("{}:produced {}".format(self.name,num))
+        print(str(list(items.queue))+f"<{items.qsize()}>")
+        
 
     def wait(self):
         attente = 0.2
-        attente += random.randint(1, 60) / 100
+        attente += random.randint(1, 60) / 10
         time.sleep(attente)
 
     def run(self):
-        i = 1
-        while i < 3:
+        while 1:
             self.wait()
             self.produce_item()
-            i += 1
             
 
 
 class Consumer(Thread):
-    def __init__(self, items):
+    def __init__(self):
         Thread.__init__(self)
-        self.items = items
 
     def consume_item(self):
-        global items
         num = items.get()
-        print("{}: consumed an item {}".format(self.name,num))
+        print("{}: consumed {}".format(self.name,num))
+        print(str(list(items.queue))+f"<{items.qsize()}>")
 
     def wait(self):
         attente = 0.2
-        attente += random.randint(1, 60) / 100
+        attente += random.randint(1, 60) / 10
         time.sleep(attente)
 
     def run(self):
-        i = 1
-        while i < 3:
+        while 1:
             self.wait()
             self.consume_item()
-            i += 1
             
 
 
 if __name__ == "__main__":
 
     PRODUCERS = 3
-    CONSUMERS = 3
+    CONSUMERS = 1
 
     items = Queue(10)
     producers = []
@@ -64,12 +59,12 @@ if __name__ == "__main__":
 
 
     for _ in range(PRODUCERS):
-        thread = Producer(items)
+        thread = Producer()
         consumers.append(thread)
         consumers[-1].start()
 
     for _ in range(CONSUMERS):
-        thread = Consumer(items)
+        thread = Consumer()
         consumers.append(thread)
         consumers[-1].start()
 
