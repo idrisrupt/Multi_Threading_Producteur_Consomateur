@@ -26,7 +26,6 @@ class Producer(Thread):
         while 1:
             self.wait()
             self.produce_item()
-            self.wait()
 
 
 class Consumer(Thread):
