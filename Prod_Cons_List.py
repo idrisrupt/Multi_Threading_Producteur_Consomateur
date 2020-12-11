@@ -11,11 +11,12 @@ class Producer(Thread):
         self.items = items
 
     def produce_item(self):
-        with lock:
-            num = random.randint(1, 100)
-            self.items.append(num)
-            print("{}: item produit {}".format(self.name, num))
-            print(str(items)+f"<{len(items)}>")
+        lock.acquire()
+        num = random.randint(1, 100)
+        self.items.append(num)
+        lock.release()
+        print("{}: item produit {}".format(self.name, num))
+        print(str(items)+f"<{len(items)}>")
 
     def wait(self):
         attente = 0.2
@@ -23,9 +24,9 @@ class Producer(Thread):
         time.sleep(attente)
 
     def run(self):
-        while 1:
-            self.wait()
+        while True:
             self.produce_item()
+            self.wait()
 
 
 class Consumer(Thread):
@@ -34,11 +35,12 @@ class Consumer(Thread):
         self.items = items
 
     def consume_item(self):
-        with lock:
-            if items:
-                item = self.items.pop(0)
-                print("{}: item consomme {}".format(self.name, item))
-                print(str(items)+f"<{len(items)}>")
+        if items:
+            lock.acquire()
+            item = self.items.pop(0)
+            lock.release()
+            print("{}: item consomme {}".format(self.name, item))
+            print(str(items)+f"<{len(items)}>")
 
 
     def wait(self):
@@ -47,10 +49,7 @@ class Consumer(Thread):
         time.sleep(attente)
 
     def run(self):
-
-        while 1:
-            
-            self.wait()
+        while True:
             self.consume_item()
             self.wait()
 
